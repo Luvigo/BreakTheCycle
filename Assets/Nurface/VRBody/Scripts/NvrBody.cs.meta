@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 207e93ce5516c9b4d9da49764124e66e
+timeCreated: 1480290717
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 79337
+  packageName: VR Body
+  packageVersion: 1.2
+  assetPath: Assets/Nurface/VRBody/Scripts/NvrBody.cs
+  uploadId: 166060

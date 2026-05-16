@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: ff65abe44ce4f1b4d904bf0c13895dbb
+timeCreated: 1481063044
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 79337
+  packageName: VR Body
+  packageVersion: 1.2
+  assetPath: Assets/Nurface/VRBody/Animations/VRBody_TurnLeft.anim
+  uploadId: 166060

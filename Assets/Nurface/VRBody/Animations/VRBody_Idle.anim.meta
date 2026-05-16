@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: fa951ae3c8e241042aaee463254a2145
+timeCreated: 1480446673
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 79337
+  packageName: VR Body
+  packageVersion: 1.2
+  assetPath: Assets/Nurface/VRBody/Animations/VRBody_Idle.anim
+  uploadId: 166060

@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: b963abd273882824e858f2707352e7d6
+timeCreated: 1485465998
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 79337
+  packageName: VR Body
+  packageVersion: 1.2
+  assetPath: Assets/Nurface/DemoAssets/Scripts/DemoAutowalk.cs
+  uploadId: 166060

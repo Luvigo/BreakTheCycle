@@ -1,0 +1,13 @@
+fileFormatVersion: 2
+guid: a4e4d73a3d0815b4891756a6261425e9
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 79337
+  packageName: VR Body
+  packageVersion: 1.2
+  assetPath: Assets/Nurface/DemoAssets/Materials/DefaultAvatar/face_color_map.mat
+  uploadId: 166060

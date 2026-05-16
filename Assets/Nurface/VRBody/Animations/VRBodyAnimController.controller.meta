@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: fb116a722c658a04db32ee22d4ba1858
+timeCreated: 1480444329
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 79337
+  packageName: VR Body
+  packageVersion: 1.2
+  assetPath: Assets/Nurface/VRBody/Animations/VRBodyAnimController.controller
+  uploadId: 166060

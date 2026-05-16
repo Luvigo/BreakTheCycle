@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 7fc91a5a596d9f042801c4a59ab836c6
+timeCreated: 1488828253
+licenseType: Store
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 79337
+  packageName: VR Body
+  packageVersion: 1.2
+  assetPath: Assets/Nurface/VRBody/Documentation/VRBody_V12.pdf
+  uploadId: 166060

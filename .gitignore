@@ -1,0 +1,46 @@
+# Unity
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emoryCaptures/
+
+# Visual Studio / Rider
+.vs/
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# Gradle (Android)
+.gradle/
+.utmp/
+
+# OS
+.DS_Store
+Thumbs.db
+mono_crash.*.json
+
+# Crashlytics
+crashlytics-build.properties
+
+# Local Unity / IL2CPP backups (no subir)
+MundoOscuro_BackUpThisFolder_ButDontShipItWithYourGame/
+
+# Builds y artefactos grandes (GitHub límite 100 MB; APKs no van al repo)
+*.apk
+*.aab
+*.symbols.zip
+*BackUpThisFolder*

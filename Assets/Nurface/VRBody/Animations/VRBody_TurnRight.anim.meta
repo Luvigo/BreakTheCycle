@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: bbe543ae7c3275c4e95f6e1d7e0d4d9c
+timeCreated: 1481063044
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 79337
+  packageName: VR Body
+  packageVersion: 1.2
+  assetPath: Assets/Nurface/VRBody/Animations/VRBody_TurnRight.anim
+  uploadId: 166060
