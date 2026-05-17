@@ -84,6 +84,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: c0e8ec4be6a4d554881a5c8bb6d0c0cf, type: 3}
       insertIndex: -1
       addedObject: {fileID: 8516156209441235530}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: c0e8ec4be6a4d554881a5c8bb6d0c0cf, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8516156209441235531}
   m_SourcePrefab: {fileID: 100100000, guid: c0e8ec4be6a4d554881a5c8bb6d0c0cf, type: 3}
 --- !u!1 &8516156209441235526 stripped
 GameObject:
@@ -185,3 +188,94 @@ MonoBehaviour:
   m_MinHitIntervalToPlayer: 0.72
   m_AnimatorSpeedFloatName: Speed
   m_AttackTriggerName: RightAttack
+--- !u!114 &8516156209441235531
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8516156209441235526}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c5d9f02e3b7e5d1f0a4c8e2f6b9d5a3b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MundoMental.VR.Combat.NegativeThoughtActor
+  m_PhraseBank: {fileID: 11400000, guid: d6e0f13f4c8f6e2a1b5d9f3a7c0e6b4c, type: 2}
+  m_FallbackPhrase: 'No estoy suficiente.'
+  m_LabelOffsetY: 0.58
+  m_LabelFallbackWorldHeight: 2.25
+  m_AnchorLabelToHeadBone: 1
+  m_WorldLabelWidthMeters: 1.55
+  m_TmpFontSize: 42
+  m_LabelColor: {r: 0.92, g: 0.88, b: 0.88, a: 0.98}
+  m_UseSoftBillboardAura: 1
+  m_SoftAuraQuadWorldSize: {x: 2.35, y: 2.85}
+  m_SoftAuraGaussianSigma: 0.5
+  m_SoftAuraMaxAlpha: 0.2
+  m_SoftAuraTextureSize: 128
+  m_AuraLocalCenter: {x: 0, y: 0.95, z: 0}
+  m_AuraColor: {r: 0.02, g: 0.02, b: 0.06, a: 1}
+  m_AuraDrawOnTop: 1
+  m_AuraLayer: -1
+  m_AuraMaterialOptionalOverride: {fileID: 2100000, guid: e7f1a24a5d9a7f3b2c6e0a4b8d1f7c5d, type: 2}
+  m_WhisperLoopClip: {fileID: 0}
+  m_WhisperBaseVolume: 0.22
+  m_WhisperMinDistance: 1.2
+  m_WhisperMaxDistance: 14
+  m_VolumeByNormalizedDistance:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0.08
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  m_UseLowPassByDistance: 1
+  m_LowpassFarHz: 900
+  m_LowpassNearHz: 12000
+  m_LowpassCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  m_AudioCut: {fileID: 0}
+  m_AudioBreath: {fileID: 0}
+  m_AudioBell: {fileID: 0}
+  m_ReliefVolume: 0.55
+  m_WhisperFadeOutSeconds: 0.35
+  m_ReliefStaggerSeconds: 0.04

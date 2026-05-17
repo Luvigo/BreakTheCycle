@@ -61,12 +61,12 @@ namespace MundoMental.VR.Combat
             var hb = new GameObject(HitboxObjName);
             hb.layer = gameObject.layer;
             hb.transform.SetParent(transform, false);
-            hb.transform.localPosition = new Vector3(0f, 1.05f, 0.5f);
+            hb.transform.localPosition = new Vector3(0f, 1.1f, 0.65f);
             hb.transform.localRotation = Quaternion.identity;
             var bx = hb.AddComponent<BoxCollider>();
             bx.isTrigger = true;
             bx.center = Vector3.zero;
-            bx.size = new Vector3(1.15f, 1f, 0.85f);
+            bx.size = new Vector3(1.35f, 1.1f, 1.05f);
             return hb.AddComponent<EnemyMeleeHitbox>();
         }
 
@@ -208,17 +208,24 @@ namespace MundoMental.VR.Combat
     [DisallowMultipleComponent]
     public sealed class EnemyMeleeHitbox : MonoBehaviour
     {
+        const int OverlapBufferLen = 16;
+
         SkeletonMeleeAi m_OwnerAi;
         float m_DamageAmount;
         float m_HitCooldown;
         bool m_WindowEnabled;
         float m_NextHitTime;
+        BoxCollider m_Box;
+        Collider[] m_OverlapBuffer;
 
         public void Configure(SkeletonMeleeAi owner, float dmg, float minIntervalSeconds)
         {
             m_OwnerAi = owner;
             m_DamageAmount = dmg;
             m_HitCooldown = Mathf.Max(0.05f, minIntervalSeconds);
+            m_Box = GetComponent<BoxCollider>();
+            if (m_OverlapBuffer == null)
+                m_OverlapBuffer = new Collider[OverlapBufferLen];
             EnableDamageWindow(false);
         }
 
@@ -226,7 +233,31 @@ namespace MundoMental.VR.Combat
 
         public void ResetHitCooldownGate() => m_NextHitTime = 0f;
 
-        void OnTriggerStay(Collider other)
+        void FixedUpdate()
+        {
+            if (!m_WindowEnabled || m_Box == null || !m_Box.enabled || !m_Box.isTrigger)
+                return;
+            Bounds b = m_Box.bounds;
+            int n = Physics.OverlapBoxNonAlloc(
+                b.center,
+                b.extents,
+                m_OverlapBuffer,
+                transform.rotation,
+                ~0,
+                QueryTriggerInteraction.Collide);
+            for (int i = 0; i < n; i++)
+            {
+                var c = m_OverlapBuffer[i];
+                if (c != null)
+                    TryApplyMeleeDamage(c);
+            }
+        }
+
+        void OnTriggerEnter(Collider other) => TryApplyMeleeDamage(other);
+
+        void OnTriggerStay(Collider other) => TryApplyMeleeDamage(other);
+
+        void TryApplyMeleeDamage(Collider other)
         {
             if (!m_WindowEnabled)
                 return;

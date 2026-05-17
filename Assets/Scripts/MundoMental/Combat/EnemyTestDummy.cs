@@ -82,6 +82,9 @@ namespace MundoMental.VR.Combat
         {
             CombatLog.Log($"Dummy: {name} derrotado (fin prueba de daño).", "Enemy");
             Died?.Invoke(this);
+            var thought = GetComponent<NegativeThoughtActor>();
+            if (thought != null)
+                thought.OnDefeated();
             var melee = GetComponent<SkeletonMeleeAi>();
             if (melee != null)
                 melee.enabled = false;

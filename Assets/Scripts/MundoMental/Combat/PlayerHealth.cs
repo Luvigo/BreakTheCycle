@@ -12,9 +12,12 @@ namespace MundoMental.VR.Combat
         [SerializeField] bool m_LogDamage = true;
         [SerializeField] bool m_CreateHud = true;
         [SerializeField] bool m_CreateVictoryUi = true;
+        [SerializeField] [Tooltip("Si no es null, la barra de vida se parenta a este Transform (ej. Right Controller).")] Transform m_HealthHudHandAnchor;
         [SerializeField] float m_HurtCapsuleRadius = 0.28f;
         [SerializeField] float m_HurtCapsuleHeight = 1.62f;
         [SerializeField] Vector3 m_HurtCapsuleCenter = new Vector3(0f, 0.9f, 0f);
+        [SerializeField] [Tooltip("Layer del volumen de daño. Default (0) para que los triggers enemigos en Default lo detecten; el XR Rig a veces está en Ignore Raycast (2).")]
+        int m_HurtVolumePhysicsLayer = 0;
 
         float m_Current;
 
@@ -41,19 +44,29 @@ namespace MundoMental.VR.Combat
 
         void Start()
         {
-            if (m_CreateHud && GetComponent<PlayerHealthHud>() == null)
-                gameObject.AddComponent<PlayerHealthHud>();
+            if (m_CreateHud)
+            {
+                var hud = GetComponent<PlayerHealthHud>();
+                if (hud == null)
+                    hud = gameObject.AddComponent<PlayerHealthHud>();
+                hud.SetFollowHand(m_HealthHudHandAnchor);
+            }
             if (m_CreateVictoryUi && FindFirstObjectByType<AllSkeletonsClearedMenu>() == null)
                 gameObject.AddComponent<AllSkeletonsClearedMenu>();
         }
 
         void EnsureHurtVolume()
         {
-            if (transform.Find(DefaultHurtChildName) != null)
+            var existingTf = transform.Find(DefaultHurtChildName);
+            if (existingTf != null)
+            {
+                if (m_HurtVolumePhysicsLayer >= 0)
+                    existingTf.gameObject.layer = m_HurtVolumePhysicsLayer;
                 return;
+            }
 
             var go = new GameObject(DefaultHurtChildName);
-            go.layer = gameObject.layer;
+            go.layer = m_HurtVolumePhysicsLayer >= 0 ? m_HurtVolumePhysicsLayer : gameObject.layer;
             go.transform.SetParent(transform, false);
             go.transform.localRotation = Quaternion.identity;
             go.transform.localPosition = m_HurtCapsuleCenter;

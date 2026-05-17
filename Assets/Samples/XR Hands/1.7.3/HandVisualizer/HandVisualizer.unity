@@ -4481,7 +4481,7 @@ MonoBehaviour:
   m_PrioritizeAvatarPrefab: 1
   m_AutoCorrectTinyBodyScale: 1
   m_TargetBodyWorldHeight: 1.65
-  m_LocalBodyOffset: {x: 0, y: 0, z: 0}
+  m_LocalBodyOffset: {x: 0, y: 0.1, z: 0}
   m_BodyUniformScale: 1
   m_YawOffsetDegrees: 0
   m_YawSmoothTime: 0.12
@@ -4529,7 +4529,7 @@ MonoBehaviour:
   m_BodyAnchorInstantFollow: 1
   m_HeadAnchorSmoothSpeed: 30
   m_HeadAnchorMaxStepPerFrame: 0.5
-  m_HeadAnchorVerticalBias: 0.14
+  m_HeadAnchorVerticalBias: -0.04
   m_HeadAnchorHorizontalBias: {x: 0, y: -0.09}
   m_ForceAnimatorAlwaysAnimate: 1
   m_SkinMeshesUpdateWhenOffscreen: 1
@@ -4555,9 +4555,11 @@ MonoBehaviour:
   m_LogDamage: 1
   m_CreateHud: 1
   m_CreateVictoryUi: 1
+  m_HealthHudHandAnchor: {fileID: 2021209626}
   m_HurtCapsuleRadius: 0.28
   m_HurtCapsuleHeight: 1.62
   m_HurtCapsuleCenter: {x: 0, y: 0.9, z: 0}
+  m_HurtVolumePhysicsLayer: 0
 --- !u!114 &56321351446552428
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4654,7 +4656,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Mediator: {fileID: 6640002711106219952}
   m_TransformationPriority: 0
-  m_MoveSpeed: 2.5
+  m_MoveSpeed: 4.35
   m_InAirControlModifier: 0.5
   m_EnableStrafe: 1
   m_EnableFly: 0
