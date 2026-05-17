@@ -121,5 +121,18 @@ namespace MundoMental.VR.Combat
                 CombatLog.Log("Escudo: sin energía — se baja", "Shield");
             }
         }
+
+        /// <summary>Bloqueo de daño melee: cualquier escudo activo bajo el mismo rig que el jugador.</summary>
+        public static bool IsAnyShieldBlockingPlayerRoot(Transform anyTransformOnPlayer)
+        {
+            if (anyTransformOnPlayer == null)
+                return false;
+            foreach (var s in anyTransformOnPlayer.root.GetComponentsInChildren<ShieldController>(true))
+            {
+                if (s != null && s.IsBlocking)
+                    return true;
+            }
+            return false;
+        }
     }
 }

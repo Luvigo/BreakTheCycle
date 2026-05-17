@@ -81,6 +81,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: c0e8ec4be6a4d554881a5c8bb6d0c0cf, type: 3}
       insertIndex: -1
       addedObject: {fileID: 8516156209441235528}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: c0e8ec4be6a4d554881a5c8bb6d0c0cf, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8516156209441235530}
   m_SourcePrefab: {fileID: 100100000, guid: c0e8ec4be6a4d554881a5c8bb6d0c0cf, type: 3}
 --- !u!1 &8516156209441235526 stripped
 GameObject:
@@ -149,8 +152,36 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9861eda132037487f9aeed3b3d77ee11, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MundoMental.VR.Combat.EnemyTestDummy
-  m_MaxHealth: 40
+  m_MaxHealth: 78
   m_LogEachHit: 1
   m_Visual: {fileID: 0}
   m_Flash: 1
   m_DamageColor: {r: 1, g: 0.35, b: 0.2, a: 1}
+  m_UseAnimatorTriggers: 1
+  m_Animator: {fileID: 0}
+  m_TriggerDamage: Damage
+  m_TriggerDeath: Death
+
+--- !u!114 &8516156209441235530
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8516156209441235526}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a823b445c0164ea9b73d2197f6018e01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MundoMental.VR.Combat.SkeletonMeleeAi
+  m_PlayerTargetOverride: {fileID: 0}
+  m_ChaseSpeed: 3.6
+  m_TurnSpeedDegrees: 320
+  m_AttackRange: 1.85
+  m_AttackWarmupBias: -0.12
+  m_MeleeDamageWindow: 0.36
+  m_AttackCooldownSeconds: 1.95
+  m_MeleeDamage: 11
+  m_MinHitIntervalToPlayer: 0.72
+  m_AnimatorSpeedFloatName: Speed
+  m_AttackTriggerName: RightAttack

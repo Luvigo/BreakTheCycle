@@ -198,9 +198,9 @@ namespace MundoMental.VR
         bool m_SpawnHeadShadowProxy = true;
 
         [SerializeField]
-        [Range(0.05f, 0.20f)]
-        [Tooltip("Radio (m) del proxy de sombra de la cabeza. Aproxima el tamano del craneo del avatar.")]
-        float m_HeadShadowProxyRadius = 0.12f;
+        [Range(0.05f, 0.30f)]
+        [Tooltip("Radio (m) del proxy de sombra de la cabeza. Aproxima el tamano del craneo del avatar. Si la sombra se ve pequena, subelo en el inspector.")]
+        float m_HeadShadowProxyRadius = 0.14f;
 
         [SerializeField]
         [Tooltip("(Opcional) Tambien aumenta el nearClipPlane de la camara HMD para descartar geometria muy cercana. Suele NO necesitarse si 'Hide Avatar Head By Bone Scale' esta activo.")]
@@ -1243,6 +1243,37 @@ namespace MundoMental.VR
 
         Transform m_HeadShadowProxy;
 
+        /// <summary>Material compartido URP: el primitivo por defecto usa Built-in y en URP no proyecta sombra (se ve magenta / sin cabeza en la sombra).</summary>
+        static Material s_SharedHeadShadowProxyMaterial;
+
+        static Material GetOrCreateSharedHeadShadowProxyMaterial()
+        {
+            if (s_SharedHeadShadowProxyMaterial != null)
+                return s_SharedHeadShadowProxyMaterial;
+
+            var shader = Shader.Find("Universal Render Pipeline/Lit");
+            if (shader == null)
+                shader = Shader.Find("Universal Render Pipeline/Simple Lit");
+            if (shader == null)
+                shader = Shader.Find("Universal Render Pipeline/Baked Lit");
+
+            s_SharedHeadShadowProxyMaterial = shader != null
+                ? new Material(shader) { name = "HeadShadowProxy_URP_Shared" }
+                : null;
+
+            if (s_SharedHeadShadowProxyMaterial != null)
+            {
+                if (s_SharedHeadShadowProxyMaterial.HasProperty("_BaseColor"))
+                    s_SharedHeadShadowProxyMaterial.SetColor("_BaseColor", Color.black);
+                else if (s_SharedHeadShadowProxyMaterial.HasProperty("_Color"))
+                    s_SharedHeadShadowProxyMaterial.SetColor("_Color", Color.black);
+                if (s_SharedHeadShadowProxyMaterial.HasProperty("_Surface"))
+                    s_SharedHeadShadowProxyMaterial.SetFloat("_Surface", 0f);
+            }
+
+            return s_SharedHeadShadowProxyMaterial;
+        }
+
         void SpawnHeadShadowProxyIfNeeded()
         {
             if (!m_SpawnHeadShadowProxy || m_Animator == null || !m_Animator.isHuman)
@@ -1253,28 +1284,43 @@ namespace MundoMental.VR
             if (headBone == null)
                 return;
 
-            var neck = m_Animator.GetBoneTransform(HumanBodyBones.Neck);
-            var parent = neck != null ? neck : headBone.parent;
+            var parent = m_BodyRoot;
             if (parent == null)
-                parent = m_BodyRoot;
+            {
+                var neck = m_Animator.GetBoneTransform(HumanBodyBones.Neck);
+                parent = neck != null ? neck : headBone.parent;
+            }
+
+            if (parent == null)
+                return;
 
             var proxy = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             proxy.name = "HeadShadowProxy";
             var col = proxy.GetComponent<Collider>();
-            if (col != null) Destroy(col);
+            if (col != null)
+                Destroy(col);
 
-            proxy.transform.SetParent(parent, true);
+            proxy.transform.SetParent(parent, false);
             m_HeadShadowProxy = proxy.transform;
 
             var mr = proxy.GetComponent<MeshRenderer>();
             if (mr != null)
             {
+                var mat = GetOrCreateSharedHeadShadowProxyMaterial();
+                if (mat != null)
+                    mr.sharedMaterial = mat;
+
                 mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly;
                 mr.receiveShadows = false;
                 mr.lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.Off;
                 mr.reflectionProbeUsage = UnityEngine.Rendering.ReflectionProbeUsage.Off;
                 mr.allowOcclusionWhenDynamic = false;
             }
+
+            if (m_MatchBodyLayerToHeadCamera && m_HeadCamera != null)
+                proxy.layer = m_HeadCamera.gameObject.layer;
+            else
+                proxy.layer = parent.gameObject.layer;
         }
 
         void UpdateHeadShadowProxy()
@@ -1288,8 +1334,18 @@ namespace MundoMental.VR
             var headWorldUp = headBone.parent != null ? headBone.parent.up : Vector3.up;
             m_HeadShadowProxy.position = headBone.position + headWorldUp * (m_HeadShadowProxyRadius * 0.5f);
             m_HeadShadowProxy.rotation = headBone.rotation;
-            var diameter = m_HeadShadowProxyRadius * 2f;
-            m_HeadShadowProxy.localScale = new Vector3(diameter, diameter, diameter);
+
+            var parent = m_HeadShadowProxy.parent;
+            var ps = parent != null ? AverageUniformLossyScale(parent) : 1f;
+            ps = Mathf.Max(1e-4f, ps);
+            var localUniform = (2f * m_HeadShadowProxyRadius) / ps;
+            m_HeadShadowProxy.localScale = Vector3.one * localUniform;
+        }
+
+        static float AverageUniformLossyScale(Transform t)
+        {
+            var ls = t.lossyScale;
+            return (Mathf.Abs(ls.x) + Mathf.Abs(ls.y) + Mathf.Abs(ls.z)) / 3f;
         }
 
         void LateUpdate()
@@ -1419,8 +1475,8 @@ namespace MundoMental.VR
                 m_HeadHideNearClip = 0.40f;
             if (m_HeadShadowProxyRadius < 0.05f)
                 m_HeadShadowProxyRadius = 0.05f;
-            else if (m_HeadShadowProxyRadius > 0.20f)
-                m_HeadShadowProxyRadius = 0.20f;
+            else if (m_HeadShadowProxyRadius > 0.30f)
+                m_HeadShadowProxyRadius = 0.30f;
         }
     }
 }

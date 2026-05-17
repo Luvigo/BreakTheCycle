@@ -10,6 +10,7 @@ namespace MundoMental.VR.Combat
         Sword = 3,
         Environment = 4,
         Blunt = 5,
+        EnemyMelee = 6,
     }
 
     public struct DamageInfo
