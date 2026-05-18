@@ -13134,6 +13134,7 @@ GameObject:
   m_Component:
   - component: {fileID: 888888002}
   - component: {fileID: 888888003}
+  - component: {fileID: 888888004}
   m_Layer: 0
   m_Name: WorldBackground
   m_TagString: Untagged
@@ -13174,6 +13175,21 @@ MonoBehaviour:
   m_WorldCenter: {x: 0, y: 8, z: 0}
   m_FollowPlayerXZ: 1
   m_Exposure: 0.35
+--- !u!114 &888888004
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 888888001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51dc68b6cab4ee0aa2a6addf4b2d12d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MundoMental.VR.Environment.BackgroundMusicPlayer
+  m_Clip: {fileID: 8300000, guid: 4cd81290d05ee624985e02fe1a5f3d03, type: 3}
+  m_Volume: 0.35
+  m_PlayOnEnable: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

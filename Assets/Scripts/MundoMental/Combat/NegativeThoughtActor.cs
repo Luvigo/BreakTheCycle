@@ -48,7 +48,7 @@ namespace MundoMental.VR.Combat
 
         [Header("Susurro (3D)")]
         [SerializeField] AudioClip m_WhisperLoopClip;
-        [SerializeField] float m_WhisperBaseVolume = 0.15f;
+        [SerializeField] float m_WhisperBaseVolume = 0.08f;
         [SerializeField] float m_WhisperMinDistance = 1.2f;
         [SerializeField] float m_WhisperMaxDistance = 14f;
         [SerializeField] AnimationCurve m_VolumeByNormalizedDistance =
@@ -640,7 +640,7 @@ namespace MundoMental.VR.Combat
                 : t;
             float vol = m_WhisperBaseVolume * Mathf.Clamp01(volMul);
             if (d <= m_WhisperMaxDistance)
-                vol = Mathf.Max(vol, m_WhisperBaseVolume * 0.15f);
+                vol = Mathf.Max(vol, m_WhisperBaseVolume * 0.08f);
             m_Whisper.volume = Mathf.Clamp01(vol);
             m_Whisper.spatialBlend = 0f;
 

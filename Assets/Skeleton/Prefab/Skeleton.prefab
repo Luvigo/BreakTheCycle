@@ -218,7 +218,7 @@ MonoBehaviour:
   m_AuraLayer: -1
   m_KiParticleMaterialOptionalOverride: {fileID: 2100000, guid: e7f1a24a5d9a7f3b2c6e0a4b8d1f7c5d, type: 2}
   m_WhisperLoopClip: {fileID: 8300000, guid: 8127ab7b3746e4ad2bae5c83e03fcd02, type: 3}
-  m_WhisperBaseVolume: 0.15
+  m_WhisperBaseVolume: 0.08
   m_WhisperMinDistance: 1.2
   m_WhisperMaxDistance: 14
   m_VolumeByNormalizedDistance:
