@@ -1,3 +1,4 @@
+using MundoMental.VR;
 using UnityEngine;
 
 namespace MundoMental.VR.Combat
@@ -44,6 +45,8 @@ namespace MundoMental.VR.Combat
 
         void Start()
         {
+            VrAudioListenerUtility.EnsureSingleListenerOnRigCamera();
+
             if (m_CreateHud)
             {
                 var hud = GetComponent<PlayerHealthHud>();

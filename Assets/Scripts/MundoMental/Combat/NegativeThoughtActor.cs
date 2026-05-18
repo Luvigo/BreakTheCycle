@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Reflection;
+using MundoMental.VR;
 using TMPro;
 using Unity.XR.CoreUtils;
 using UnityEngine;
@@ -47,7 +48,7 @@ namespace MundoMental.VR.Combat
 
         [Header("Susurro (3D)")]
         [SerializeField] AudioClip m_WhisperLoopClip;
-        [SerializeField] float m_WhisperBaseVolume = 0.22f;
+        [SerializeField] float m_WhisperBaseVolume = 0.15f;
         [SerializeField] float m_WhisperMinDistance = 1.2f;
         [SerializeField] float m_WhisperMaxDistance = 14f;
         [SerializeField] AnimationCurve m_VolumeByNormalizedDistance =
@@ -91,6 +92,7 @@ namespace MundoMental.VR.Combat
         void Awake()
         {
             m_Animator = GetComponentInChildren<Animator>();
+            VrAudioListenerUtility.EnsureSingleListenerOnRigCamera();
             EnsureAura();
             EnsureLabel();
             EnsureAudio();
@@ -159,9 +161,10 @@ namespace MundoMental.VR.Combat
 
         void EnsureAura()
         {
-            var existing = transform.Find(AuraChildName);
-            if (existing != null)
-                Destroy(existing.gameObject);
+            if (!IsAlive(this) || !IsAlive(transform))
+                return;
+
+            DestroyNamedChild(transform, AuraChildName);
 
             var auraRoot = new GameObject(AuraChildName);
             auraRoot.transform.SetParent(transform, false);
@@ -174,7 +177,8 @@ namespace MundoMental.VR.Combat
                 BuildLegacySphereAura(auraRoot.transform);
 
             int layer = m_AuraLayer >= 0 ? m_AuraLayer : gameObject.layer;
-            SetLayerRecursively(auraRoot.transform, layer);
+            if (IsAlive(auraRoot.transform))
+                SetLayerRecursively(auraRoot.transform, layer);
         }
 
         void BuildKiParticleAura(Transform parent)
@@ -458,18 +462,37 @@ namespace MundoMental.VR.Combat
                 p.SetValue(r, false);
         }
 
+        static bool IsAlive(Object o) => o != null && o;
+
         static void SetLayerRecursively(Transform t, int layer)
         {
+            if (!IsAlive(t))
+                return;
             t.gameObject.layer = layer;
             for (var i = 0; i < t.childCount; i++)
-                SetLayerRecursively(t.GetChild(i), layer);
+            {
+                var child = t.GetChild(i);
+                if (IsAlive(child))
+                    SetLayerRecursively(child, layer);
+            }
+        }
+
+        static void DestroyNamedChild(Transform parent, string childName)
+        {
+            if (!IsAlive(parent))
+                return;
+            var existing = parent.Find(childName);
+            if (!IsAlive(existing))
+                return;
+            Object.DestroyImmediate(existing.gameObject);
         }
 
         void EnsureLabel()
         {
-            var existing = transform.Find(LabelChildName);
-            if (existing != null)
-                Destroy(existing.gameObject);
+            if (!IsAlive(this) || !IsAlive(transform))
+                return;
+
+            DestroyNamedChild(transform, LabelChildName);
 
             var rootGo = new GameObject(LabelChildName);
             m_LabelRoot = rootGo.transform;
@@ -505,15 +528,19 @@ namespace MundoMental.VR.Combat
             }
 
             int vizLayer = m_AuraLayer >= 0 ? m_AuraLayer : gameObject.layer;
-            SetLayerRecursively(m_LabelRoot, vizLayer);
+            if (IsAlive(m_LabelRoot))
+                SetLayerRecursively(m_LabelRoot, vizLayer);
 
             RefreshLabelTmp();
         }
 
         void UpdateLabelAnchoredPosition()
         {
-            if (m_LabelRoot == null)
+            if (!IsAlive(m_LabelRoot))
+            {
+                m_LabelRoot = null;
                 return;
+            }
             Vector3 worldPos;
             if (m_AnchorLabelToHeadBone && m_Animator != null && m_Animator.isHuman)
             {
@@ -534,6 +561,7 @@ namespace MundoMental.VR.Combat
             if (m_Defeated)
                 return;
 
+            VrAudioListenerUtility.EnsureSingleListenerOnRigCamera();
             UpdateLabelAnchoredPosition();
 
             var cam = ResolveRigCamera();
@@ -562,10 +590,13 @@ namespace MundoMental.VR.Combat
             var w = gameObject.AddComponent<AudioSource>();
             w.playOnAwake = false;
             w.loop = true;
-            w.spatialBlend = 1f;
-            w.rolloffMode = AudioRolloffMode.Logarithmic;
+            w.spatialBlend = 0f;
+            w.rolloffMode = AudioRolloffMode.Custom;
             w.minDistance = m_WhisperMinDistance;
             w.maxDistance = m_WhisperMaxDistance;
+            w.dopplerLevel = 0f;
+            w.SetCustomCurve(AudioSourceCurveType.CustomRolloff,
+                AnimationCurve.Constant(0f, 1f, 1f));
             w.clip = m_WhisperLoopClip;
             w.volume = 0f;
             m_Whisper = w;
@@ -597,17 +628,21 @@ namespace MundoMental.VR.Combat
             if (!m_Whisper.isPlaying)
                 m_Whisper.Play();
 
-            Transform ear = listenerCam != null ? listenerCam.transform : null;
+            Transform ear = ResolveListenerEar(listenerCam);
             if (ear == null)
                 return;
 
             float d = Vector3.Distance(ear.position, transform.position);
-            float t = Mathf.InverseLerp(m_WhisperMaxDistance, m_WhisperMinDistance, d);
+            float t = Mathf.InverseLerp(m_WhisperMinDistance, m_WhisperMaxDistance, d);
             t = Mathf.Clamp01(t);
             float volMul = m_VolumeByNormalizedDistance != null && m_VolumeByNormalizedDistance.length > 0
                 ? m_VolumeByNormalizedDistance.Evaluate(t)
                 : t;
-            m_Whisper.volume = m_WhisperBaseVolume * Mathf.Clamp01(volMul);
+            float vol = m_WhisperBaseVolume * Mathf.Clamp01(volMul);
+            if (d <= m_WhisperMaxDistance)
+                vol = Mathf.Max(vol, m_WhisperBaseVolume * 0.15f);
+            m_Whisper.volume = Mathf.Clamp01(vol);
+            m_Whisper.spatialBlend = 0f;
 
             if (m_LowPass != null && m_UseLowPassByDistance)
             {
@@ -617,6 +652,26 @@ namespace MundoMental.VR.Combat
                 float hz = Mathf.Lerp(m_LowpassFarHz, m_LowpassNearHz, lpT);
                 m_LowPass.cutoffFrequency = Mathf.Clamp(hz, 10f, 22000f);
             }
+        }
+
+        static Transform ResolveListenerEar(Camera rigCam)
+        {
+            if (rigCam != null)
+            {
+                var onCam = rigCam.GetComponent<AudioListener>();
+                if (onCam != null && onCam.enabled)
+                    return rigCam.transform;
+            }
+
+            var listeners = FindObjectsByType<AudioListener>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+            for (int i = 0; i < listeners.Length; i++)
+            {
+                var al = listeners[i];
+                if (al != null && al.enabled)
+                    return al.transform;
+            }
+
+            return rigCam != null ? rigCam.transform : null;
         }
 
         Camera ResolveRigCamera()

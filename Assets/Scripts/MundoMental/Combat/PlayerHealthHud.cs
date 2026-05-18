@@ -1,3 +1,4 @@
+using MundoMental.VR;
 using TMPro;
 using Unity.XR.CoreUtils;
 using UnityEngine;
@@ -5,7 +6,7 @@ using UnityEngine.UI;
 
 namespace MundoMental.VR.Combat
 {
-    /// <summary>Vida del jugador: HUD ante el HMD o anclado a la mano derecha (barra + texto).</summary>
+    /// <summary>Vida del jugador: HUD en world space, anclado al HMD o siguiendo la mano sin parentarse a ella.</summary>
     [DisallowMultipleComponent]
     [DefaultExecutionOrder(50)]
     public sealed class PlayerHealthHud : MonoBehaviour
@@ -18,28 +19,24 @@ namespace MundoMental.VR.Combat
         [SerializeField] Vector3 m_HandLocalPosition = new Vector3(0.08f, 0.03f, 0.2f);
         [SerializeField] Vector3 m_HandLocalEuler = new Vector3(-72f, 12f, 0f);
         [SerializeField] float m_HandHudWorldWidth = 0.34f;
-        [SerializeField] [Tooltip("Rota el HUD hacia la cámara del casco aunque esté parentado a la mano (más legible en VR).")]
-        bool m_FaceHmdWhileOnHand = true;
+        [SerializeField] bool m_FaceHmdWhileOnHand = true;
 
         [Header("VR / capas")]
         [SerializeField] int m_CanvasSortingOrder = 32000;
-        [SerializeField] [Tooltip("Si >= 0, fuerza esta layer en todo el HUD. -1 = misma layer que la cámara del XR Origin.")]
-        int m_ForceUiLayer = -1;
+        [SerializeField] int m_ForceUiLayer = -1;
 
         PlayerHealth m_Health;
         TextMeshProUGUI m_Text;
         Image m_FillImage;
         Canvas m_Canvas;
         Transform m_HudRoot;
-        bool m_PendingRecreate;
 
         public void SetFollowHand(Transform hand)
         {
-            if (m_FollowHand == hand)
-                return;
-            m_FollowHand = hand;
-            m_PendingRecreate = true;
+            m_FollowHand = IsAlive(hand) ? hand : null;
         }
+
+        static bool IsAlive(Object o) => o != null && o;
 
         void Awake()
         {
@@ -56,6 +53,8 @@ namespace MundoMental.VR.Combat
                 return;
             }
             m_Health.HealthChanged += OnHealthChanged;
+            if (!IsAlive(m_FollowHand))
+                m_FollowHand = null;
             EnsureCanvas();
             OnHealthChanged(m_Health.Health, m_Health.MaxHealth);
         }
@@ -64,6 +63,14 @@ namespace MundoMental.VR.Combat
         {
             if (m_Health != null)
                 m_Health.HealthChanged -= OnHealthChanged;
+        }
+
+        Transform ResolveHudParent()
+        {
+            var origin = GetComponentInParent<XROrigin>();
+            if (origin != null && IsAlive(origin.transform))
+                return origin.transform;
+            return IsAlive(transform) ? transform : null;
         }
 
         Camera ResolveRigCamera()
@@ -76,29 +83,49 @@ namespace MundoMental.VR.Combat
 
         static void SetLayerRecursively(Transform t, int layer)
         {
+            if (!IsAlive(t))
+                return;
             t.gameObject.layer = layer;
             for (var i = 0; i < t.childCount; i++)
-                SetLayerRecursively(t.GetChild(i), layer);
+            {
+                var child = t.GetChild(i);
+                if (IsAlive(child))
+                    SetLayerRecursively(child, layer);
+            }
+        }
+
+        void SanitizeRefs()
+        {
+            if (!IsAlive(m_FollowHand))
+                m_FollowHand = null;
+            if (!IsAlive(m_HudRoot))
+            {
+                m_HudRoot = null;
+                m_Canvas = null;
+                m_Text = null;
+                m_FillImage = null;
+            }
         }
 
         void LateUpdate()
         {
-            if (m_PendingRecreate)
-            {
-                DestroyHudRoot();
-                EnsureCanvas();
-                OnHealthChanged(m_Health.Health, m_Health.MaxHealth);
-                m_PendingRecreate = false;
-            }
+            if (!IsAlive(this))
+                return;
 
-            if (m_HudRoot == null)
+            VrAudioListenerUtility.EnsureSingleListenerOnRigCamera();
+            SanitizeRefs();
+
+            if (!IsAlive(m_HudRoot))
+                EnsureCanvas();
+
+            if (!IsAlive(m_HudRoot))
                 return;
 
             var cam = ResolveRigCamera();
             if (cam != null && m_Canvas != null && m_Canvas.worldCamera != cam)
                 m_Canvas.worldCamera = cam;
 
-            if (m_FollowHand == null)
+            if (!IsAlive(m_FollowHand))
             {
                 if (cam == null)
                     return;
@@ -108,6 +135,8 @@ namespace MundoMental.VR.Combat
                 return;
             }
 
+            m_HudRoot.position = m_FollowHand.TransformPoint(m_HandLocalPosition);
+
             if (m_FaceHmdWhileOnHand && cam != null)
             {
                 var p = m_HudRoot.position;
@@ -115,61 +144,62 @@ namespace MundoMental.VR.Combat
                 if (toCam.sqrMagnitude > 1e-6f)
                     m_HudRoot.rotation = Quaternion.LookRotation(toCam, Vector3.up);
             }
-        }
-
-        void DestroyHudRoot()
-        {
-            if (m_HudRoot == null)
-                return;
-            if (Application.isPlaying)
-                Destroy(m_HudRoot.gameObject);
             else
-                DestroyImmediate(m_HudRoot.gameObject);
-            m_HudRoot = null;
-            m_Canvas = null;
-            m_Text = null;
-            m_FillImage = null;
+                m_HudRoot.rotation = m_FollowHand.rotation * Quaternion.Euler(m_HandLocalEuler);
         }
 
         void EnsureCanvas()
         {
-            if (m_HudRoot != null)
+            if (!IsAlive(this))
                 return;
 
-            m_HudRoot = new GameObject("PlayerHealthHud").transform;
-            if (m_FollowHand != null)
-            {
-                m_HudRoot.SetParent(m_FollowHand, false);
-                m_HudRoot.localPosition = m_HandLocalPosition;
-                m_HudRoot.localRotation = Quaternion.Euler(m_HandLocalEuler);
-            }
-            else
-                m_HudRoot.SetParent(transform, false);
+            SanitizeRefs();
+            if (IsAlive(m_HudRoot))
+                return;
 
-            m_Canvas = m_HudRoot.gameObject.AddComponent<Canvas>();
+            var parent = ResolveHudParent();
+            if (!IsAlive(parent))
+                return;
+
+            var rootGo = new GameObject("PlayerHealthHud");
+            m_HudRoot = rootGo.transform;
+            m_HudRoot.SetParent(parent, false);
+
+            m_Canvas = rootGo.AddComponent<Canvas>();
             m_Canvas.renderMode = RenderMode.WorldSpace;
             var cam = ResolveRigCamera();
             m_Canvas.worldCamera = cam;
             m_Canvas.sortingOrder = m_CanvasSortingOrder;
             m_Canvas.vertexColorAlwaysGammaSpace = true;
 
-            var rt = m_Canvas.GetComponent<RectTransform>();
+            var rt = rootGo.GetComponent<RectTransform>();
             rt.sizeDelta = new Vector2(560f, 72f);
-            float targetWidth = m_FollowHand != null ? m_HandHudWorldWidth : m_WorldWidth;
+            float targetWidth = IsAlive(m_FollowHand) ? m_HandHudWorldWidth : m_WorldWidth;
             var scale = targetWidth / rt.rect.width;
             rt.localScale = Vector3.one * scale;
 
             int uiLayer = m_ForceUiLayer >= 0 ? m_ForceUiLayer : (cam != null ? cam.gameObject.layer : 0);
             SetLayerRecursively(m_HudRoot, uiLayer);
 
-            var bg = new GameObject("Panel").transform;
-            bg.SetParent(m_HudRoot, false);
-            var bgRt = bg.gameObject.AddComponent<RectTransform>();
+            if (!IsAlive(m_HudRoot))
+                return;
+
+            BuildHudVisuals();
+        }
+
+        void BuildHudVisuals()
+        {
+            if (!IsAlive(m_HudRoot))
+                return;
+
+            var bgGo = new GameObject("Panel");
+            bgGo.transform.SetParent(m_HudRoot, false);
+            var bgRt = bgGo.AddComponent<RectTransform>();
             bgRt.anchorMin = Vector2.zero;
             bgRt.anchorMax = Vector2.one;
             bgRt.offsetMin = Vector2.zero;
             bgRt.offsetMax = Vector2.zero;
-            var bgImg = bg.gameObject.AddComponent<Image>();
+            var bgImg = bgGo.AddComponent<Image>();
             bgImg.color = new Color(0f, 0f, 0f, 0.65f);
 
             var barGo = new GameObject("HealthBar");

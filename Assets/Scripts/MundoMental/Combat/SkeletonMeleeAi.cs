@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace MundoMental.VR.Combat
@@ -19,11 +20,21 @@ namespace MundoMental.VR.Combat
         [SerializeField] float m_MinHitIntervalToPlayer = 0.72f;
         [SerializeField] string m_AnimatorSpeedFloatName = "Speed";
         [SerializeField] string m_AttackTriggerName = "RightAttack";
+        [SerializeField] [Tooltip("Si es false, anima/ persigue pero no quita vida (ej. Boss decorativo).")]
+        bool m_CanDealMeleeDamage = true;
 
         [Header("Separación (evita que copias converjan al mismo punto)")]
         [SerializeField] float m_SeparationRadius = 1.15f;
         [SerializeField] float m_SeparationWeight = 1.35f;
         [SerializeField] int m_OverlapBufferSize = 24;
+
+        [Header("Suelo del mapa")]
+        [SerializeField] bool m_SnapToWalkableGround = true;
+        [SerializeField] float m_FootHeightOffset;
+        [SerializeField] float m_GroundRayStartHeight = 4f;
+        [SerializeField] float m_GroundRayMaxDistance = 14f;
+        [SerializeField] float m_MinGroundNormalY = 0.35f;
+        [SerializeField] float m_MaxGroundSnapPerFrame = 0.45f;
 
         Rigidbody m_Rb;
         Animator m_Animator;
@@ -34,9 +45,20 @@ namespace MundoMental.VR.Combat
         float m_MeleeEndsTime;
         bool m_MeleeWindow;
         Collider[] m_NeighborBuffer;
+        CapsuleCollider m_BodyCapsule;
+        float m_LastAnimSpeed;
+
+        public bool CanDealMeleeDamage => m_CanDealMeleeDamage;
 
         void Awake()
         {
+            if (gameObject.name.IndexOf("boss", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                m_CanDealMeleeDamage = false;
+                m_ChaseSpeed = 0f;
+                m_SnapToWalkableGround = false;
+            }
+
             m_Rb = GetComponent<Rigidbody>();
             m_Animator = GetComponentInChildren<Animator>();
             m_EnemyHealth = GetComponent<EnemyTestDummy>();
@@ -45,6 +67,51 @@ namespace MundoMental.VR.Combat
                 m_Hitbox = CreateHitbox();
             m_Hitbox.Configure(this, m_MeleeDamage, m_MinHitIntervalToPlayer);
             m_NeighborBuffer = new Collider[Mathf.Clamp(m_OverlapBufferSize, 8, 64)];
+            m_BodyCapsule = GetComponent<CapsuleCollider>();
+            if (m_Rb != null)
+            {
+                m_Rb.useGravity = false;
+                m_Rb.isKinematic = true;
+                m_Rb.interpolation = RigidbodyInterpolation.None;
+                m_Rb.constraints = RigidbodyConstraints.FreezeRotation;
+            }
+            if (m_BodyCapsule != null)
+                m_BodyCapsule.isTrigger = true;
+            if (m_SnapToWalkableGround)
+                WalkableMapGroundSetup.PrepareSceneWalkableGround();
+            IgnoreWalkableGroundCollisions();
+
+            if (!m_CanDealMeleeDamage)
+                DisableMeleeHitbox();
+        }
+
+        void DisableMeleeHitbox()
+        {
+            if (m_Hitbox == null)
+                return;
+            m_Hitbox.EnableDamageWindow(false);
+            var col = m_Hitbox.GetComponent<Collider>();
+            if (col != null)
+                col.enabled = false;
+        }
+
+        void IgnoreWalkableGroundCollisions()
+        {
+            if (m_BodyCapsule == null)
+                return;
+            var markers = FindObjectsByType<WalkableGroundMarker>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            for (int i = 0; i < markers.Length; i++)
+            {
+                var col = markers[i].GetComponent<Collider>();
+                if (col != null)
+                    Physics.IgnoreCollision(m_BodyCapsule, col, true);
+            }
+        }
+
+        void OnEnable()
+        {
+            if (m_SnapToWalkableGround)
+                SnapToGroundImmediate();
         }
 
         EnemyMeleeHitbox CreateHitbox()
@@ -83,6 +150,7 @@ namespace MundoMental.VR.Combat
         {
             if (!IsOperational())
             {
+                m_LastAnimSpeed = 0f;
                 if (m_Animator != null && !string.IsNullOrEmpty(m_AnimatorSpeedFloatName))
                     m_Animator.SetFloat(m_AnimatorSpeedFloatName, 0f);
                 return;
@@ -91,15 +159,43 @@ namespace MundoMental.VR.Combat
             ResolveTarget();
             if (m_Target == null)
             {
+                m_LastAnimSpeed = 0f;
                 if (m_Animator != null && !string.IsNullOrEmpty(m_AnimatorSpeedFloatName))
                     m_Animator.SetFloat(m_AnimatorSpeedFloatName, 0f);
                 return;
             }
 
-            var planar = m_Target.position - m_Rb.position;
+            if (m_Animator != null && !string.IsNullOrEmpty(m_AnimatorSpeedFloatName))
+                m_Animator.SetFloat(m_AnimatorSpeedFloatName, m_LastAnimSpeed);
+
+            var planar = m_Target.position - transform.position;
             planar.y = 0f;
             float distPlanar = planar.magnitude;
-            Vector3 planarDir = distPlanar > 0.05f ? planar / distPlanar : Vector3.forward;
+            if (distPlanar <= m_AttackRange && Time.time >= m_NextAttackTime)
+                StartAttackPulse();
+
+            if (m_MeleeWindow && Time.time >= m_MeleeEndsTime)
+                StopMeleeVisual();
+        }
+
+        void FixedUpdate()
+        {
+            if (!IsOperational())
+                return;
+
+            ResolveTarget();
+            if (m_Target == null)
+            {
+                m_LastAnimSpeed = 0f;
+                return;
+            }
+
+            Vector3 posBefore = transform.position;
+
+            var planar = m_Target.position - posBefore;
+            planar.y = 0f;
+            float distPlanar = planar.magnitude;
+            Vector3 planarDir = distPlanar > 0.05f ? planar / distPlanar : transform.forward;
             Vector3 separation = ComputeSeparationPush();
             Vector3 combined = planarDir + separation;
             combined.y = 0f;
@@ -108,29 +204,75 @@ namespace MundoMental.VR.Combat
             if (distPlanar > 0.05f)
             {
                 var look = Quaternion.LookRotation(planarDir, Vector3.up);
-                m_Rb.MoveRotation(Quaternion.RotateTowards(m_Rb.rotation, look, m_TurnSpeedDegrees * Time.deltaTime));
+                var rot = Quaternion.RotateTowards(transform.rotation, look, m_TurnSpeedDegrees * Time.fixedDeltaTime);
+                transform.rotation = rot;
+                if (m_Rb != null)
+                    m_Rb.rotation = rot;
             }
-
-            float locomotion = Mathf.Clamp01(distPlanar / Mathf.Max(0.05f, m_ChaseSpeed * 4f));
-            if (distPlanar <= m_AttackRange)
-                locomotion *= 0.25f;
-
-            if (m_Animator != null && !string.IsNullOrEmpty(m_AnimatorSpeedFloatName))
-                m_Animator.SetFloat(m_AnimatorSpeedFloatName, locomotion);
 
             float stopDistance = Mathf.Max(0f, m_AttackRange + m_AttackWarmupBias);
             if (distPlanar > stopDistance)
             {
-                float stepMag = Mathf.Min(m_ChaseSpeed * Time.deltaTime, distPlanar - stopDistance);
+                float stepMag = Mathf.Min(m_ChaseSpeed * Time.fixedDeltaTime, distPlanar - stopDistance);
                 var step = moveDir * stepMag;
-                m_Rb.MovePosition(m_Rb.position + new Vector3(step.x, 0f, step.z));
+                var next = posBefore + new Vector3(step.x, 0f, step.z);
+                transform.position = next;
+                if (m_Rb != null)
+                    m_Rb.position = next;
             }
 
-            if (distPlanar <= m_AttackRange && Time.time >= m_NextAttackTime)
-                StartAttackPulse();
+            Vector3 planarDelta = transform.position - posBefore;
+            planarDelta.y = 0f;
+            float planarSpeed = planarDelta.magnitude / Mathf.Max(Time.fixedDeltaTime, 1e-5f);
+            m_LastAnimSpeed = Mathf.Clamp01(planarSpeed / Mathf.Max(0.01f, m_ChaseSpeed));
+            if (distPlanar <= m_AttackRange)
+                m_LastAnimSpeed *= 0.25f;
 
-            if (m_MeleeWindow && Time.time >= m_MeleeEndsTime)
-                StopMeleeVisual();
+        }
+
+        void LateUpdate()
+        {
+            if (!m_SnapToWalkableGround || !IsOperational())
+                return;
+            SnapToGroundSmooth();
+        }
+
+        void SnapToGroundImmediate()
+        {
+            if (!TrySampleGroundY(out float y))
+                return;
+            var p = transform.position;
+            p.y = y;
+            ApplyPosition(p);
+        }
+
+        void SnapToGroundSmooth()
+        {
+            if (!TrySampleGroundY(out float targetY))
+                return;
+            var p = transform.position;
+            float maxStep = Mathf.Max(0.01f, m_MaxGroundSnapPerFrame);
+            p.y = Mathf.MoveTowards(p.y, targetY, maxStep);
+            ApplyPosition(p);
+        }
+
+        void ApplyPosition(Vector3 p)
+        {
+            transform.position = p;
+            if (m_Rb != null)
+                m_Rb.position = p;
+        }
+
+        bool TrySampleGroundY(out float groundY)
+        {
+            return WalkableGroundUtility.TryGetGroundHeight(
+                transform.position,
+                transform,
+                m_FootHeightOffset,
+                m_GroundRayStartHeight,
+                m_GroundRayMaxDistance,
+                m_MinGroundNormalY,
+                out groundY);
         }
 
         bool IsOperational() => m_EnemyHealth != null && m_EnemyHealth.IsAlive && m_Rb != null;
@@ -141,7 +283,7 @@ namespace MundoMental.VR.Combat
                 m_Target = m_PlayerTargetOverride;
             else
             {
-                var ph = Object.FindFirstObjectByType<PlayerHealth>();
+                var ph = UnityEngine.Object.FindFirstObjectByType<PlayerHealth>();
                 m_Target = ph != null ? ph.transform : null;
             }
         }
@@ -152,7 +294,7 @@ namespace MundoMental.VR.Combat
                 return Vector3.zero;
 
             int found = Physics.OverlapSphereNonAlloc(
-                m_Rb.position,
+                transform.position,
                 m_SeparationRadius,
                 m_NeighborBuffer,
                 ~0,
@@ -167,7 +309,7 @@ namespace MundoMental.VR.Combat
                 var otherAi = c.GetComponentInParent<SkeletonMeleeAi>();
                 if (otherAi == null || otherAi == this || !otherAi.enabled)
                     continue;
-                Vector3 delta = m_Rb.position - c.bounds.center;
+                Vector3 delta = transform.position - c.bounds.center;
                 delta.y = 0f;
                 float dist = delta.magnitude;
                 if (dist < 1e-4f)
@@ -186,8 +328,8 @@ namespace MundoMental.VR.Combat
         {
             m_NextAttackTime = Time.time + m_AttackCooldownSeconds;
             m_MeleeEndsTime = Time.time + m_MeleeDamageWindow;
-            m_MeleeWindow = true;
-            if (m_Hitbox != null)
+            m_MeleeWindow = m_CanDealMeleeDamage;
+            if (m_Hitbox != null && m_CanDealMeleeDamage)
             {
                 m_Hitbox.EnableDamageWindow(true);
                 m_Hitbox.ResetHitCooldownGate();
@@ -260,6 +402,8 @@ namespace MundoMental.VR.Combat
         void TryApplyMeleeDamage(Collider other)
         {
             if (!m_WindowEnabled)
+                return;
+            if (m_OwnerAi != null && !m_OwnerAi.CanDealMeleeDamage)
                 return;
             if (!DamageableUtility.TryGetDamageable(other, out var d) || d is not PlayerHealth ph)
                 return;

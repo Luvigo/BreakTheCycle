@@ -476,8 +476,25 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8551833708452050451, guid: b59d0ae955ad5994f937e8ed893b172c, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3269226348880562199}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 9071911966566427817, guid: b59d0ae955ad5994f937e8ed893b172c, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7812345678901234567}
   m_SourcePrefab: {fileID: 100100000, guid: b59d0ae955ad5994f937e8ed893b172c, type: 3}
+--- !u!114 &7812345678901234567
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e1a2b3c4d5e6478990abcdef12345603, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MundoMental.VR.Combat.WalkableMapGroundSetup
+  m_ApplyOnAwake: 1
+  m_LogSetup: 0
 --- !u!4 &8915855821900675317 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8551833708452050451, guid: b59d0ae955ad5994f937e8ed893b172c, type: 3}
