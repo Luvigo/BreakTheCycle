@@ -1,17 +1,22 @@
+using System;
 using MundoMental.VR.Combat;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace MundoMental.VR.Environment
 {
-    /// <summary>Esqueleto Boss visible en Scene y Play, hijo de BossAnchor.</summary>
+    /// <summary>Boss decorativo en Play, hijo de BossAnchor (esqueleto o Bully).</summary>
     [DisallowMultipleComponent]
-    [ExecuteAlways]
     public sealed class BossSpawner : MonoBehaviour
     {
-        const string SkeletonPrefabPath = "Assets/Skeleton/Prefab/Skeleton.prefab";
+        const string SkeletonModelPath = "Assets/Skeleton/FBX/Skeleton.fbx";
+        const string BullyModelPath = "Assets/Free Demo of Low Poly Space Alien Worlds 3D Asset Pack/Bully_000.fbx";
         const string SpawnedChildName = "Boss";
 
-        [SerializeField] GameObject m_SkeletonPrefab;
+        [SerializeField] GameObject m_BossPrefab;
+        [SerializeField] bool m_SpawnOnPlay = true;
         [SerializeField] float m_Scale = 10f;
         [SerializeField] bool m_FacePlayerOnSpawn = true;
 
@@ -19,6 +24,9 @@ namespace MundoMental.VR.Environment
 
         void OnEnable()
         {
+            if (!Application.isPlaying || !m_SpawnOnPlay)
+                return;
+
             TryResolvePrefab();
             SpawnIfNeeded();
         }
@@ -33,16 +41,25 @@ namespace MundoMental.VR.Environment
 
         void TryResolvePrefab()
         {
-            if (m_SkeletonPrefab != null)
+            if (m_BossPrefab != null)
                 return;
 #if UNITY_EDITOR
-            m_SkeletonPrefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(SkeletonPrefabPath);
+            m_BossPrefab = LoadModelPrefab(SkeletonModelPath);
+            if (m_BossPrefab == null)
+                m_BossPrefab = LoadModelPrefab(BullyModelPath);
 #endif
         }
 
+#if UNITY_EDITOR
+        static GameObject LoadModelPrefab(string assetPath)
+        {
+            return AssetDatabase.LoadAssetAtPath<GameObject>(assetPath);
+        }
+#endif
+
         void SpawnIfNeeded()
         {
-            if (m_SkeletonPrefab == null)
+            if (m_BossPrefab == null)
                 return;
 
             var existing = transform.Find(SpawnedChildName);
@@ -53,12 +70,25 @@ namespace MundoMental.VR.Environment
                 return;
             }
 
-            m_Spawned = Instantiate(m_SkeletonPrefab, transform);
+            m_Spawned = InstantiateBoss(m_BossPrefab, transform);
+            if (m_Spawned == null)
+                return;
+
             m_Spawned.name = SpawnedChildName;
             ApplyBossSettings();
+            CombatLog.Log($"Boss listo en {m_Spawned.transform.position} escala {m_Scale}", "Boss");
+        }
 
-            if (Application.isPlaying)
-                CombatLog.Log($"Boss listo en {m_Spawned.transform.position} escala {m_Scale}", "Boss");
+        static GameObject InstantiateBoss(GameObject prefab, Transform parent)
+        {
+            if (prefab == null)
+                return null;
+
+#if UNITY_EDITOR
+            if (PrefabUtility.IsPartOfPrefabAsset(prefab))
+                return (GameObject)PrefabUtility.InstantiatePrefab(prefab, parent);
+#endif
+            return Instantiate(prefab, parent);
         }
 
         void ApplyBossSettings()
@@ -81,7 +111,13 @@ namespace MundoMental.VR.Environment
             if (anim != null)
                 anim.cullingMode = AnimatorCullingMode.AlwaysAnimate;
 
-            if (Application.isPlaying && m_FacePlayerOnSpawn)
+            if (m_Spawned.GetComponentInChildren<BullyBossPresenter>(true) == null
+                && m_Spawned.name.IndexOf("bully", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                m_Spawned.AddComponent<BullyBossPresenter>();
+            }
+
+            if (m_FacePlayerOnSpawn)
             {
                 var player = FindFirstObjectByType<PlayerHealth>();
                 if (player != null)

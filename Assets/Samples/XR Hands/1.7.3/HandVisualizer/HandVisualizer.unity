@@ -26,7 +26,7 @@ RenderSettings:
   m_AmbientIntensity: 1
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
-  m_SkyboxMaterial: {fileID: 2020743000}
+  m_SkyboxMaterial: {fileID: 411689178}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -873,6 +873,46 @@ Transform:
   - {fileID: 8366379412495768454}
   m_Father: {fileID: 2145209016}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!21 &411689178
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: WorldBackground_Skybox
+  m_Shader: {fileID: 108, guid: 0000000000000000f000000000000000, type: 0}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords:
+  - _MAPPING_LATITUDE_LONGITUDE_LAYOUT
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: 1a402e79078404e23a22153910d0316f, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _Exposure: 0.35
+    - _ImageType: 0
+    - _Layout: 0
+    - _Mapping: 1
+    - _MirrorOnBack: 0
+    - _Rotation: 0
+    m_Colors:
+    - _Tint: {r: 0.5, g: 0.5, b: 0.5, a: 0.5}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!1 &534330482 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 9089750185126552519, guid: 4d101319ef35bd64cb06b43222e0b87a, type: 3}
@@ -1928,7 +1968,8 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 2744223413029556909, guid: 4d101319ef35bd64cb06b43222e0b87a, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 9204521691717711114, guid: 4d101319ef35bd64cb06b43222e0b87a, type: 3}
@@ -3760,43 +3801,43 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 2f54336dc9637c14fa35994a66e700de, type: 3}
       propertyPath: m_LocalScale.x
-      value: 20
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 2f54336dc9637c14fa35994a66e700de, type: 3}
       propertyPath: m_LocalScale.y
-      value: 20
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 2f54336dc9637c14fa35994a66e700de, type: 3}
       propertyPath: m_LocalScale.z
-      value: 20
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 2f54336dc9637c14fa35994a66e700de, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.8
+      value: -14.473233
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 2f54336dc9637c14fa35994a66e700de, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -17.5
+      value: -21.52
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 2f54336dc9637c14fa35994a66e700de, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -35.8
+      value: 29.609537
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 2f54336dc9637c14fa35994a66e700de, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 1
+      value: 0.26620123
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 2f54336dc9637c14fa35994a66e700de, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 2f54336dc9637c14fa35994a66e700de, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: 0.9639175
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 2f54336dc9637c14fa35994a66e700de, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 2f54336dc9637c14fa35994a66e700de, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -3804,7 +3845,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 2f54336dc9637c14fa35994a66e700de, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
+      value: 149.123
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 2f54336dc9637c14fa35994a66e700de, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
@@ -3849,8 +3890,47 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 2f54336dc9637c14fa35994a66e700de, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1662715031}
   m_SourcePrefab: {fileID: 100100000, guid: 2f54336dc9637c14fa35994a66e700de, type: 3}
+--- !u!1 &1662715030 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 2f54336dc9637c14fa35994a66e700de, type: 3}
+  m_PrefabInstance: {fileID: 1662715027}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1662715031
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1662715030}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c4e8a1f92b3d4e6f8a0b1c2d3e4f5a6b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MundoMental.VR.Environment.BullyBossPresenter
+  m_FacePlayer: 1
+  m_TurnSpeedDegrees: 42
+  m_LookAtMinDistance: 1.5
+  m_UseProceduralIdle: 1
+  m_GestureMinSeconds: 3.5
+  m_GestureMaxSeconds: 7
+  m_LaughDurationSeconds: 2.4
+  m_AnimateArms: 0
+  m_ApplyArmHangPose: 0
+  m_FixArmsOutOfTPose: 1
+  m_ArmDropAngle: 38
+  m_ElbowRestBend: 18
+  m_ShoulderDropZ: 82
+  m_ElbowBendX: 28
+  m_ForceHandsRestOnGround: 0
+  m_AutoFlipShoulderDrop: 0
+  m_ArmSwayDegrees: 1
+  m_HandSwayDegrees: 1
+  m_InvertShoulderDrop: 0
 --- !u!1001 &1686867618
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4739,46 +4819,6 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -8346689930144010462, guid: 504190109f008394a9d26b8b0cdf056a, type: 3}
---- !u!21 &2020743000
-Material:
-  serializedVersion: 8
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: WorldBackground_Skybox
-  m_Shader: {fileID: 108, guid: 0000000000000000f000000000000000, type: 0}
-  m_Parent: {fileID: 0}
-  m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
-  m_InvalidKeywords:
-  - _MAPPING_LATITUDE_LONGITUDE_LAYOUT
-  m_LightmapFlags: 4
-  m_EnableInstancingVariants: 0
-  m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
-  stringTagMap: {}
-  disabledShaderPasses: []
-  m_LockedProperties: 
-  m_SavedProperties:
-    serializedVersion: 3
-    m_TexEnvs:
-    - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 1a402e79078404e23a22153910d0316f, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    m_Ints: []
-    m_Floats:
-    - _Exposure: 0.35
-    - _ImageType: 0
-    - _Layout: 0
-    - _Mapping: 1
-    - _MirrorOnBack: 0
-    - _Rotation: 0
-    m_Colors:
-    - _Tint: {r: 0.5, g: 0.5, b: 0.5, a: 0.5}
-  m_BuildTextureStacks: []
-  m_AllowLocking: 1
 --- !u!4 &2021209626
 Transform:
   m_ObjectHideFlags: 0
@@ -5323,7 +5363,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b7c6d5e4f3a29180706f5e4d3c2b1a10, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MundoMental.VR.Environment.BossSpawner
-  m_SkeletonPrefab: {fileID: 100100000, guid: 4c67ed6c086451b4db54ac4d24b626bb, type: 3}
+  m_BossPrefab: {fileID: 0}
+  m_SpawnOnPlay: 0
   m_Scale: 10
   m_FacePlayerOnSpawn: 1
 --- !u!1001 &8833001123
